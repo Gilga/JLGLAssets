@@ -1,4 +1,8 @@
+*.info
+*.mem
+*.cov
 *.jl.cov
-*.jl.*.cov
 *.jl.mem
+*.jl.*.cov
+*.jl.*.mem
 deps/deps.jl
