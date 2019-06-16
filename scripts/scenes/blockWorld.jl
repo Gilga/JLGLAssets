@@ -462,9 +462,9 @@ function presetCamera()
 end
 
 function presetTextures()
-  vars.texture_blocks = uploadTexture(RessourceManager.getPath(:TEXTURES, "blocks.png")) #joinpath(@__DIR__,"../../assets/textures/blocks.png")
-  vars.texture_heightMap = uploadTexture(:HEIGHTMAP, (1024,1024)) #uploadTextureGray(RessourceManager.getPath(:TEXTURES, "heightmap.png")) #joinpath(@__DIR__,"../../assets/textures/heightmap.png"))
-  vars.texture_screen = uploadTexture(:SCREEN, (vars.WIDTH,vars.HEIGHT))
+  vars.texture_blocks = createTexture(RessourceManager.getPath(:TEXTURES, "blocks.png")) #joinpath(@__DIR__,"../../assets/textures/blocks.png")
+  vars.texture_heightMap = createTexture(:HEIGHTMAP, (1024,1024)) #createTextureGray(RessourceManager.getPath(:TEXTURES, "heightmap.png")) #joinpath(@__DIR__,"../../assets/textures/heightmap.png"))
+  vars.texture_screen = createTexture(:SCREEN, (vars.WIDTH,vars.HEIGHT))
 end
 
 """ TODO """
@@ -710,7 +710,7 @@ function uploadData()
       end
 
       vars.depthrenderbuffer = GPU.create(:RENDERBUFFER, :RENDER1)
-      vars.texture_depth = createTexture(:DEPTH, (vars.WIDTH,vars.HEIGHT);level=vars.LOD_LEVELS) #vars.DEPTH_SIZE #?
+      vars.texture_depth = createTextureStorage(:DEPTH, (vars.WIDTH,vars.HEIGHT); level=vars.LOD_LEVELS) #vars.DEPTH_SIZE #?
 
       glActiveTexture(GL_TEXTURE0)
       glBindTexture(GL_TEXTURE_2D, vars.texture_depth)
@@ -808,7 +808,7 @@ end
 function reloadShaderProgram(program::Symbol, shaders::AbstractArray; transformfeedback=false)
   result=false
   try
-    p = createShaderProgram(program, shaders; transformfeedback=transformfeedback)
+    p = createShaderProgram(shaders; name=program, transformfeedback=transformfeedback)
     if p >= 0
       @GLCHECK glUseProgram(0)
       @GLCHECK glDeleteProgram(vars.PROGRAMS[program])
@@ -844,9 +844,12 @@ function reloadShaderPrograms()
   vars.global_vars[:CHUNK1D_SIZE] = vars.CHUNK1D_SIZE
   vars.global_vars[:CHUNK2D_SIZE] = vars.CHUNK2D_SIZE
   vars.global_vars[:CHUNK3D_SIZE] = vars.CHUNK3D_SIZE
+  
+  sh_vars = Dict{Symbol,Any}()
+  sh_vars[:GLOBALS] = vars.global_vars
 
   println("Load shader files...")
-  shaders = loadShaders(vars.global_vars)
+  shaders = loadShaders(sh_vars)
 
   INST_VSH = shaders[:INST_VSH]
   INST_VSH_GSH = shaders[:INST_VSH_GSH]
